@@ -8,9 +8,12 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import com.c303Junction.init.Credentials;
+import org.apache.commons.lang.StringEscapeUtils;
 
-public class Test {
+import com.c303Junction.init.Credentials;
+import com.c303Junction.utility.Utility;
+
+public class BaseTest {
 
 	public static void main(String args[]) {
 
@@ -18,42 +21,41 @@ public class Test {
 
 		String clientId = credentials.getClientId(); // Replace with your client ID
 		String clientSecret = credentials.getClientKey(); // Replace with your client Secret
-		String script = getScript();
-				
-//				"public class HelloWorld {\\r\\n   public static void main(String[] args) {\\r\\n      System.out.println(\\\"Hello, World\\\");\\r\\n   }\\r\\n}";
+		String script = "public class HelloWorld {\\r\\n   public static void main(String[] args) {\\r\\n      System.out.println(\\\"Hello, World\\\");\\r\\n   }\\r\\n}";
+
+		script = Utility.readFile("/Users/apple/eclipse-workspace/ProjectBlackHole/Files/java.txt");
+		
+		
+		
+		System.out.println("Escaped : " + StringEscapeUtils.escapeJava(script));
+		
+		script = StringEscapeUtils.escapeJava(script);
+		
+//		System.exit(1);
+		
+		
 		String language = "java";
 		String versionIndex = "0";
 
-		String output = getResponseFormBravo(clientId, clientSecret, script, language, versionIndex);
-
-		System.out.println("************************");
-
-		System.out.println(output);
-	}
-
-	private static String getScript() {
-		StringBuilder builder = new StringBuilder();
-		
-		
-		return builder.toString();
-	}
-
-	private static String getResponseFormBravo(	String clientId,
-												String clientSecret,
-												String script,
-												String language,
-												String versionIndex) {
-
-		StringBuilder builder = new StringBuilder();
-
 		try {
-			URL url = new URL("https://api.jdoodle.com/v1/execute");
+			URL url = new URL("https://api.jdoodle.com/execute");
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setDoOutput(true);
 			connection.setRequestMethod("POST");
 			connection.setRequestProperty("Content-Type", "application/json");
 
-			String input = initScript(clientId, clientSecret, script, language, versionIndex);
+			String input = "{\"clientId\": \"" + clientId
+							+ "\",\"clientSecret\":\""
+							+ clientSecret
+							+ "\",\"script\":\""
+							+ script
+							+ "\",\"language\":\""
+							+ language
+							+ "\",\"versionIndex\":\""
+							+ versionIndex
+							+ "\"} ";
+
+			System.out.println(input);
 
 			OutputStream outputStream = connection.getOutputStream();
 			outputStream.write(input.getBytes());
@@ -71,7 +73,6 @@ public class Test {
 			System.out.println("Output from JDoodle .... \n");
 			while ((output = bufferedReader.readLine()) != null) {
 				System.out.println(output);
-				builder.append(output);
 			}
 
 			connection.disconnect();
@@ -81,25 +82,5 @@ public class Test {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-
-		return builder.toString();
 	}
-
-	private static String
-			initScript(String clientId, String clientSecret, String script, String language, String versionIndex) {
-		String input = "{\"clientId\": \"" + clientId
-						+ "\",\"clientSecret\":\""
-						+ clientSecret
-						+ "\",\"script\":\""
-						+ script
-						+ "\",\"language\":\""
-						+ language
-						+ "\",\"versionIndex\":\""
-						+ versionIndex
-						+ "\"} ";
-
-		System.out.println(input);
-		return input;
-	}
-
 }
